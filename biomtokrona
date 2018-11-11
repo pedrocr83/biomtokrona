@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+env | grep LC_ALL
+unset LC_ALL
+
+FILE=${1?Error: no biom file given}
+
+biom convert -i $FILE -o table.tsv --to-tsv --table-type "OTU table" --header-key taxonomy
+
+egrep -v "^#" table.tsv > table_nocomment.tsv
+
+cut table_nocomment.tsv -f 2- > table.tsv
+
+sed -i 's/;\s*/\t/g' table.tsv
+
+ktImportText -n table -o table.krona.html table.tsv
+
+rm table_nocomment.tsv
+rm table.tsv
